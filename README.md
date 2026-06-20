@@ -2,6 +2,8 @@
 
 OpenSCAD model for a DJI Matrice 300 payload box intended to hold a Raspberry Pi 5, DJI E-Port hardware, and related cabling.
 
+![DJI Matrice 300 payload box preview](djimatrice300-payload-box.png)
+
 The design includes:
 
 - Matrice 300 mounting hole pattern: `78 x 66 mm`
@@ -14,6 +16,7 @@ The design includes:
 ## Files
 
 - `djimatrice300-payload-box.scad` - main parametric OpenSCAD model
+- `djimatrice300-payload-box.png` - preview image
 
 ## Key Dimensions
 
