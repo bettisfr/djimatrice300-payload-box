@@ -78,7 +78,6 @@ Useful shortcuts:
 Command-line STL export:
 
 ```bash
-openscad -o djimatrice300-payload-box-assembly.stl -D 'part="assembly"' djimatrice300-payload-box.scad
 openscad -o djimatrice300-payload-box-box.stl -D 'part="box"' djimatrice300-payload-box.scad
 openscad -o djimatrice300-payload-box-frame.stl -D 'part="frame"' djimatrice300-payload-box.scad
 openscad -o djimatrice300-payload-box-lid.stl -D 'part="lid"' djimatrice300-payload-box.scad
@@ -87,6 +86,7 @@ openscad -o djimatrice300-payload-box-lid.stl -D 'part="lid"' djimatrice300-payl
 ## Notes
 
 - The colored preview is for inspection only; standard STL export does not preserve colors.
+- Do not export `part="assembly"` for printing; it is intended for visual inspection only.
 - The `assembly` preview shows the split design with six M3 standoffs between the frame and box.
 - The `frame` export prints upside down on the continuous top face of the lower frame, so the DJI spacers grow upward instead of starting from disconnected islands.
 - The `box` and `frame` exports include matching box-to-frame holes for M3 female-female standoffs.
