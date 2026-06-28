@@ -34,6 +34,12 @@ The model currently exports as two separate printable components:
 1. main body
 2. lid
 
+Use the `part` parameter in `djimatrice300-payload-box.scad` to choose what to export:
+
+- `part = "assembly";` - full inspection preview with the lid raised above the box
+- `part = "body";` - main body only
+- `part = "lid";` - lid only, flipped for FDM printing with the outer flat face on the build plate
+
 ## OpenSCAD Usage
 
 Open the model:
@@ -51,7 +57,8 @@ Useful shortcuts:
 Command-line STL export:
 
 ```bash
-openscad -o djimatrice300-payload-box.stl djimatrice300-payload-box.scad
+openscad -o djimatrice300-payload-box-body.stl -D 'part="body"' djimatrice300-payload-box.scad
+openscad -o djimatrice300-payload-box-lid.stl -D 'part="lid"' djimatrice300-payload-box.scad
 ```
 
 ## Notes

@@ -23,6 +23,12 @@ $fn = 96;
 // MAIN PARAMETERS
 // ------------------------------------------------------
 
+// Export selector:
+// - "assembly": full preview with the lid lifted above the box
+// - "body": main body only
+// - "lid": lid only, flipped for FDM printing with the outer face on the bed
+part = "assembly"; // [assembly, body, lid]
+
 // Matrice 300 mounting-hole spacing
 hole_spacing_x = 78;
 hole_spacing_y = 66;
@@ -693,25 +699,41 @@ module lid_screw_holes() {
 }
 
 
-module lid() {
+module lid_geometry() {
+
+    union() {
+
+        difference() {
+
+            linear_extrude(height = lid_thickness)
+                lid_plate_2d();
+
+            lid_screw_holes();
+        }
+
+        translate([0, 0, -lid_lip_height])
+            linear_extrude(height = lid_lip_height + assembly_overlap)
+                lid_lip_2d();
+    }
+}
+
+
+module lid_preview() {
 
     lid_z = upper_plane_z + box_wall_height + lid_preview_gap;
 
     translate([0, 0, lid_z])
-        union() {
+        lid_geometry();
+}
 
-            difference() {
 
-                linear_extrude(height = lid_thickness)
-                    lid_plate_2d();
+module lid_for_printing() {
 
-                lid_screw_holes();
-            }
-
-            translate([0, 0, -lid_lip_height])
-                linear_extrude(height = lid_lip_height + assembly_overlap)
-                    lid_lip_2d();
-        }
+    // The installed lid has its lip pointing downward. For FDM printing, flip
+    // it so the outer flat face sits on the build plate and the lip prints up.
+    translate([0, 0, lid_thickness])
+        rotate([180, 0, 0])
+            lid_geometry();
 }
 
 
@@ -754,60 +776,85 @@ module vertical_posts() {
 
 
 // ------------------------------------------------------
-// FINAL ASSEMBLY
+// MAIN BODY
 // ------------------------------------------------------
 
-union() {
+module main_body() {
 
-    // Lower frame
-    color(lower_frame_color)
-        lower_frame();
+    union() {
 
-    // Solid upper floor
-    color(upper_plane_color)
-        upper_solid_plane();
+        // Lower frame
+        color(lower_frame_color)
+            lower_frame();
 
-    // Box walls
-    color(box_wall_color)
-        box_walls();
+        // Solid upper floor
+        color(upper_plane_color)
+            upper_solid_plane();
 
-    // Internal triangular reinforcements for lid screws
-    color(lid_boss_color)
-        lid_screw_bosses();
+        // Box walls
+        color(box_wall_color)
+            box_walls();
 
-    // Lid shown raised in preview
+        // Internal triangular reinforcements for lid screws
+        color(lid_boss_color)
+            lid_screw_bosses();
+
+        // Six offset vertical posts
+        color(vertical_post_color)
+            vertical_posts();
+
+        // Front spacers at A and B
+        color(spacer_color)
+            for (p = [A, B]) {
+
+                translate([
+                    p[0],
+                    p[1],
+                    -front_spacer_height
+                ])
+                    tapered_spacer(
+                        front_spacer_height + assembly_overlap
+                    );
+            }
+
+        // Rear spacers at C and D
+        color(spacer_color)
+            for (p = [C, D]) {
+
+                translate([
+                    p[0],
+                    p[1],
+                    -rear_spacer_height
+                ])
+                    tapered_spacer(
+                        rear_spacer_height + assembly_overlap
+                    );
+            }
+    }
+}
+
+
+// ------------------------------------------------------
+// FINAL OUTPUT
+// ------------------------------------------------------
+
+if (part == "lid") {
+
     color(lid_color)
-        lid();
+        lid_for_printing();
 
-    // Six offset vertical posts
-    color(vertical_post_color)
-        vertical_posts();
+} else if (part == "body") {
 
-    // Front spacers at A and B
-    color(spacer_color)
-        for (p = [A, B]) {
+    main_body();
 
-            translate([
-                p[0],
-                p[1],
-                -front_spacer_height
-            ])
-                tapered_spacer(
-                    front_spacer_height + assembly_overlap
-                );
-        }
+} else {
 
-    // Rear spacers at C and D
-    color(spacer_color)
-        for (p = [C, D]) {
+    union() {
 
-            translate([
-                p[0],
-                p[1],
-                -rear_spacer_height
-            ])
-                tapered_spacer(
-                    rear_spacer_height + assembly_overlap
-                );
-        }
+        main_body();
+
+        // Lid shown raised in preview
+        color(lid_color)
+            lid_preview();
+    }
 }
