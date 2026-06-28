@@ -73,6 +73,9 @@ taper_height = 2;
 // Box-to-frame attachment holes for M3 female-female standoffs.
 box_frame_mount_hole_diameter = 3.2;
 box_frame_mount_pad_diameter = 9;
+box_frame_screw_head_slot_width = 5.8;
+box_frame_screw_head_slot_length = 7;
+box_frame_screw_head_slot_depth = 1.2;
 box_frame_standoff_diameter = 6;
 box_frame_standoff_hole_diameter = 3.2;
 
@@ -80,9 +83,9 @@ box_frame_standoff_hole_diameter = 3.2;
 upper_plane_top_z = 26;
 upper_plane_thickness = 2.5;
 upper_plane_z = upper_plane_top_z - upper_plane_thickness;
-upper_plane_width = 86;
+upper_plane_width = 88.5;
 upper_plane_x_offset = 0;
-upper_plane_rear_extension = (arm_width / 2) + 7.5;
+upper_plane_rear_extension = (arm_width / 2) + 10;
 support_width = tail_outer_width;
 
 // Box walls
@@ -384,6 +387,11 @@ module lower_frame_with_box_mount_holes() {
             -0.1,
             frame_thickness + 0.2
         );
+
+        box_frame_screw_head_slots(
+            -0.1,
+            box_frame_screw_head_slot_depth + 0.1
+        );
     }
 }
 
@@ -487,6 +495,38 @@ module box_frame_mount_holes(z, height) {
 }
 
 
+module box_frame_screw_head_slots(z, height) {
+
+    for (p = box_frame_mount_points())
+        translate([
+            p[0],
+            p[1],
+            z
+        ])
+            linear_extrude(height = height)
+                rounded_rect_2d(
+                    box_frame_screw_head_slot_width,
+                    box_frame_screw_head_slot_length,
+                    box_frame_screw_head_slot_width / 2
+                );
+}
+
+
+module box_frame_screw_head_counterbores(z, height) {
+
+    for (p = box_frame_mount_points())
+        translate([
+            p[0],
+            p[1],
+            z
+        ])
+            cylinder(
+                h = height,
+                d = box_frame_screw_head_slot_width
+            );
+}
+
+
 module upper_solid_plane_with_mount_holes() {
 
     difference() {
@@ -496,6 +536,11 @@ module upper_solid_plane_with_mount_holes() {
         box_frame_mount_holes(
             upper_plane_z - 0.1,
             upper_plane_thickness + 0.2
+        );
+
+        box_frame_screw_head_counterbores(
+            upper_plane_z + upper_plane_thickness - box_frame_screw_head_slot_depth,
+            box_frame_screw_head_slot_depth + 0.1
         );
     }
 }

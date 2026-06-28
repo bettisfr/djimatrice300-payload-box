@@ -28,14 +28,16 @@ The design includes:
 
 - M300 hole spacing: `78 x 66 mm`
 - lower rear rail outer width: `71 mm`
-- box outer width: `86 mm`
-- box inner width: about `82 mm`
-- box inner length: about `187 mm`
+- box outer width: `88.5 mm`
+- box inner width: about `84.5 mm`
+- box inner length: about `189.5 mm`
 - vertical clearance between lower frame and upper plate: `21 mm`
 - box wall thickness: `2 mm`
 - lid thickness: `1.5 mm`
 - M3 clearance holes: `3.2 mm`
 - DJI mounting bolt seats: `6 mm` diameter, `3.5 mm` deep
+- frame-to-standoff screw head slots: `5.8 x 7 mm`, `1.2 mm` deep, on the frame
+- box floor screw head counterbores: `5.8 mm` diameter, `1.2 mm` deep
 - lid nut traps: M3 hex nuts, `5.8 mm` flat-to-flat clearance, `2.8 mm` deep
 
 ## Required Hardware
