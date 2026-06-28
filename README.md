@@ -10,7 +10,7 @@ The design includes:
 - lower mounting frame with two rear rails
 - raised payload box with cable pass-throughs
 - separate screw-mounted lid with internal lip
-- internal triangular screw reinforcements
+- internal square screw pads
 - color-coded OpenSCAD preview
 
 ## Files
@@ -24,20 +24,25 @@ The design includes:
 - lower rear rail outer width: `71 mm`
 - box outer width: `86 mm`
 - box inner width: about `82 mm`
-- box inner length: about `179.5 mm`
+- box inner length: about `187 mm`
 - vertical clearance between lower frame and upper plate: `21 mm`
 - box wall thickness: `2 mm`
 - lid thickness: `1.5 mm`
+- M3 clearance holes: `3.2 mm`
+- DJI mounting bolt seats: `6 mm` diameter, `3.5 mm` deep
 
-The model currently exports as two separate printable components:
+The model can be exported in separate components for inspection and FDM printing:
 
-1. main body
-2. lid
+1. full assembly preview
+2. payload box
+3. lower mounting frame
+4. lid
 
 Use the `part` parameter in `djimatrice300-payload-box.scad` to choose what to export:
 
 - `part = "assembly";` - full inspection preview with the lid raised above the box
-- `part = "body";` - main body only
+- `part = "box";` - payload box only, placed with its floor on the print bed and box-to-frame holes
+- `part = "frame";` - lower mounting frame only, flipped onto its continuous top face with matching box-to-frame holes
 - `part = "lid";` - lid only, flipped for FDM printing with the outer flat face on the build plate
 
 ## OpenSCAD Usage
@@ -57,13 +62,18 @@ Useful shortcuts:
 Command-line STL export:
 
 ```bash
-openscad -o djimatrice300-payload-box-body.stl -D 'part="body"' djimatrice300-payload-box.scad
+openscad -o djimatrice300-payload-box-assembly.stl -D 'part="assembly"' djimatrice300-payload-box.scad
+openscad -o djimatrice300-payload-box-box.stl -D 'part="box"' djimatrice300-payload-box.scad
+openscad -o djimatrice300-payload-box-frame.stl -D 'part="frame"' djimatrice300-payload-box.scad
 openscad -o djimatrice300-payload-box-lid.stl -D 'part="lid"' djimatrice300-payload-box.scad
 ```
 
 ## Notes
 
 - The colored preview is for inspection only; standard STL export does not preserve colors.
+- The `assembly` preview shows the split design with six M3 standoffs between the frame and box.
+- The `frame` export prints upside down on the continuous top face of the lower frame, so the DJI spacers grow upward instead of starting from disconnected islands.
+- The `box` and `frame` exports include matching box-to-frame holes for M3 female-female standoffs.
 - Screw holes are modeled as plain cylindrical holes, not threaded.
 - For plastic screws/self-tapping use, consider tuning pilot hole diameters for the chosen screw and material.
 - Check cable routing and connector clearance before final printing.

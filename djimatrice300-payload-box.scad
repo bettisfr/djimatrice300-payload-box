@@ -11,8 +11,8 @@ $fn = 96;
 //
 // Upper level:
 // - solid payload-box floor
-// - connected by six vertical posts
-// - posts near A, B, C, D are offset to keep screw holes clear
+// - connected to the lower frame through six M3 standoff points
+// - standoff points near A, B, C, D are offset to keep screw holes clear
 //
 // AB = front/head side
 // CD = rear/tail side
@@ -25,9 +25,10 @@ $fn = 96;
 
 // Export selector:
 // - "assembly": full preview with the lid lifted above the box
-// - "body": main body only
+// - "box": payload box only, placed with its floor on the print bed
+// - "frame": lower mounting frame only
 // - "lid": lid only, flipped for FDM printing with the outer face on the bed
-part = "assembly"; // [assembly, body, lid]
+part = "assembly"; // [assembly, box, frame, lid]
 
 // Matrice 300 mounting-hole spacing
 hole_spacing_x = 78;
@@ -48,7 +49,7 @@ tail_end_spacing = tail_outer_width - arm_width;
 // Mounting holes
 bolt_seat_diameter = 6;
 bolt_seat_depth = 3.5;
-bottom_hole_diameter = 3;
+bottom_hole_diameter = 3.2;
 
 // Rear cross braces
 brace_distance_1 = 40;
@@ -63,13 +64,19 @@ spacer_diameter = 9;
 tip_diameter = 6;
 taper_height = 2;
 
+// Box-to-frame attachment holes for M3 female-female standoffs.
+box_frame_mount_hole_diameter = 3.2;
+box_frame_mount_pad_diameter = 9;
+box_frame_standoff_diameter = 6;
+box_frame_standoff_hole_diameter = 3.2;
+
 // Upper payload-box floor
 upper_plane_top_z = 26;
 upper_plane_thickness = 2.5;
 upper_plane_z = upper_plane_top_z - upper_plane_thickness;
 upper_plane_width = 86;
 upper_plane_x_offset = 0;
-upper_plane_rear_extension = arm_width / 2;
+upper_plane_rear_extension = (arm_width / 2) + 7.5;
 support_width = tail_outer_width;
 
 // Box walls
@@ -98,16 +105,15 @@ lid_lip_thickness = 1.5;
 lid_clearance = 0.4;
 lid_preview_gap = 25;
 
-lid_screw_diameter = 3;
-lid_screw_triangle_leg = 12;
-lid_screw_corner_offset = 3;
+lid_screw_diameter = 3.2;
+lid_screw_pad_size = 6.5;
+lid_screw_corner_offset = 4;
 lid_boss_top_clearance = 0.5;
 
-// Vertical posts
-vertical_post_top_z = upper_plane_z + (upper_plane_thickness / 2);
-vertical_post_diameter = arm_width;
+// Box-to-frame standoff point diameter used for layout.
+standoff_point_diameter = arm_width;
 
-// Offset between vertical posts and A, B, C, D screw holes
+// Offset between standoff points and A, B, C, D screw holes
 post_offset = 10;
 
 // Small overlap between touching parts. This avoids tangent-only surfaces
@@ -118,7 +124,7 @@ assembly_overlap = 0.2;
 lower_frame_color = "DimGray";
 upper_plane_color = "Orange";
 box_wall_color = "SteelBlue";
-vertical_post_color = "ForestGreen";
+standoff_color = "ForestGreen";
 spacer_color = "MediumPurple";
 lid_color = "LightSlateGray";
 lid_boss_color = "DarkCyan";
@@ -159,7 +165,7 @@ upper_rear_left = [upper_left_x, upper_rear_y];
 upper_rear_right = [upper_right_x, upper_rear_y];
 
 // Front start points for the two lower rails. They are aligned with the
-// vertical posts and extend to the front edge.
+// front standoff points and extend to the front edge.
 left_rail_front = [support_left_x + (arm_width / 2), A[1]];
 right_rail_front = [support_right_x - (arm_width / 2), A[1]];
 
@@ -176,21 +182,21 @@ brace_2_right = [F[0], F[1] + brace_distance_2];
 
 
 // ------------------------------------------------------
-// SIX VERTICAL-POST POSITIONS
+// SIX BOX-TO-FRAME STANDOFF POSITIONS
 // ------------------------------------------------------
 
 // Near A and B, shifted toward the rear.
-A_post = [support_right_x - (vertical_post_diameter / 2), A[1] - post_offset];
-B_post = [support_left_x + (vertical_post_diameter / 2), B[1] - post_offset];
+A_post = [support_right_x - (standoff_point_diameter / 2), A[1] - post_offset];
+B_post = [support_left_x + (standoff_point_diameter / 2), B[1] - post_offset];
 
 // Near C and D, shifted toward the front.
-C_post = [support_left_x + (vertical_post_diameter / 2), C[1] + post_offset];
-D_post = [support_right_x - (vertical_post_diameter / 2), D[1] + post_offset];
+C_post = [support_left_x + (standoff_point_diameter / 2), C[1] + post_offset];
+D_post = [support_right_x - (standoff_point_diameter / 2), D[1] + post_offset];
 
-// E and F have no screw holes, so their posts stay aligned with the rear
+// E and F have no screw holes, so their standoff points stay aligned with the rear
 // rails while remaining under the upper floor footprint.
-E_post = [support_left_x + (vertical_post_diameter / 2), E[1]];
-F_post = [support_right_x - (vertical_post_diameter / 2), F[1]];
+E_post = [support_left_x + (standoff_point_diameter / 2), E[1]];
+F_post = [support_right_x - (standoff_point_diameter / 2), F[1]];
 
 
 // ------------------------------------------------------
@@ -285,7 +291,7 @@ module lower_frame() {
             );
 
             // Front extensions of the rear rails, aligned under the first
-            // four vertical posts and carried to the front edge.
+            // four standoff points and carried to the front edge.
             smooth_link(
                 left_rail_front,
                 C_tail,
@@ -346,6 +352,30 @@ module lower_frame() {
                     d = bolt_seat_diameter
                 );
         }
+    }
+}
+
+
+module lower_frame_with_box_mount_holes() {
+
+    difference() {
+
+        union() {
+
+            lower_frame();
+
+            for (p = box_frame_mount_points())
+                translate([p[0], p[1], 0])
+                    cylinder(
+                        h = frame_thickness,
+                        d = box_frame_mount_pad_diameter
+                    );
+        }
+
+        box_frame_mount_holes(
+            -0.1,
+            frame_thickness + 0.2
+        );
     }
 }
 
@@ -421,6 +451,45 @@ module upper_solid_plane() {
                     upper_rear_left
                 ]
             );
+}
+
+
+function box_frame_mount_points() = [
+    A_post,
+    B_post,
+    C_post,
+    D_post,
+    E_post,
+    F_post
+];
+
+
+module box_frame_mount_holes(z, height) {
+
+    for (p = box_frame_mount_points())
+        translate([
+            p[0],
+            p[1],
+            z
+        ])
+            cylinder(
+                h = height,
+                d = box_frame_mount_hole_diameter
+            );
+}
+
+
+module upper_solid_plane_with_mount_holes() {
+
+    difference() {
+
+        upper_solid_plane();
+
+        box_frame_mount_holes(
+            upper_plane_z - 0.1,
+            upper_plane_thickness + 0.2
+        );
+    }
 }
 
 
@@ -572,7 +641,7 @@ function lid_screw_points() = [
 ];
 
 
-module lid_screw_triangle_at(corner, x_dir, y_dir) {
+module lid_screw_pad_at(corner, x_dir, y_dir) {
 
     wall_base_z = upper_plane_z + upper_plane_thickness - assembly_overlap;
     wall_body_height =
@@ -590,12 +659,16 @@ module lid_screw_triangle_at(corner, x_dir, y_dir) {
                     points = [
                         corner,
                         [
-                            corner[0] + (x_dir * lid_screw_triangle_leg),
+                            corner[0] + (x_dir * lid_screw_pad_size),
                             corner[1]
                         ],
                         [
+                            corner[0] + (x_dir * lid_screw_pad_size),
+                            corner[1] + (y_dir * lid_screw_pad_size)
+                        ],
+                        [
                             corner[0],
-                            corner[1] + (y_dir * lid_screw_triangle_leg)
+                            corner[1] + (y_dir * lid_screw_pad_size)
                         ]
                     ]
                 );
@@ -617,10 +690,10 @@ module lid_screw_bosses() {
 
     corners = lid_inner_corners();
 
-    lid_screw_triangle_at(corners[0],  1, -1);
-    lid_screw_triangle_at(corners[1], -1, -1);
-    lid_screw_triangle_at(corners[2],  1,  1);
-    lid_screw_triangle_at(corners[3], -1,  1);
+    lid_screw_pad_at(corners[0],  1, -1);
+    lid_screw_pad_at(corners[1], -1, -1);
+    lid_screw_pad_at(corners[2],  1,  1);
+    lid_screw_pad_at(corners[3], -1,  1);
 }
 
 
@@ -738,70 +811,52 @@ module lid_for_printing() {
 
 
 // ------------------------------------------------------
-// VERTICAL POST
+// PAYLOAD BOX
 // ------------------------------------------------------
 
-module vertical_post(p) {
-
-    post_height = vertical_post_top_z - frame_thickness + (2 * assembly_overlap);
-
-    translate([
-        p[0],
-        p[1],
-        frame_thickness - assembly_overlap
-    ])
-        cylinder(
-            h = post_height,
-            d = vertical_post_diameter
-        );
-}
-
-
-// ------------------------------------------------------
-// SIX VERTICAL POSTS
-// ------------------------------------------------------
-
-module vertical_posts() {
-
-    for (p = [
-        A_post,
-        B_post,
-        C_post,
-        D_post,
-        E_post,
-        F_post
-    ])
-        vertical_post(p);
-}
-
-
-// ------------------------------------------------------
-// MAIN BODY
-// ------------------------------------------------------
-
-module main_body() {
+module payload_box(include_mount_holes = false) {
 
     union() {
 
-        // Lower frame
-        color(lower_frame_color)
-            lower_frame();
-
         // Solid upper floor
         color(upper_plane_color)
-            upper_solid_plane();
+            if (include_mount_holes)
+                upper_solid_plane_with_mount_holes();
+            else
+                upper_solid_plane();
 
         // Box walls
         color(box_wall_color)
             box_walls();
 
-        // Internal triangular reinforcements for lid screws
+        // Internal square pads for lid screws
         color(lid_boss_color)
             lid_screw_bosses();
+    }
+}
 
-        // Six offset vertical posts
-        color(vertical_post_color)
-            vertical_posts();
+
+module box_for_printing() {
+
+    translate([0, 0, -upper_plane_z])
+        payload_box(include_mount_holes = true);
+}
+
+
+// ------------------------------------------------------
+// LOWER MOUNTING FRAME
+// ------------------------------------------------------
+
+module lower_mounting_frame(include_box_mount_holes = false) {
+
+    union() {
+
+        // Lower frame
+        color(lower_frame_color)
+            if (include_box_mount_holes)
+                lower_frame_with_box_mount_holes();
+            else
+                lower_frame();
 
         // Front spacers at A and B
         color(spacer_color)
@@ -834,6 +889,68 @@ module main_body() {
 }
 
 
+module frame_for_printing() {
+
+    // Print the lower frame upside down: the continuous top face of the frame
+    // starts on the bed, and the asymmetric DJI spacers grow upward.
+    translate([0, 0, frame_thickness])
+        rotate([180, 0, 0])
+            lower_mounting_frame(
+                include_box_mount_holes = true
+            );
+}
+
+
+// ------------------------------------------------------
+// ASSEMBLY
+// ------------------------------------------------------
+
+module box_frame_standoffs() {
+
+    standoff_height = upper_plane_z - frame_thickness + assembly_overlap;
+
+    color(standoff_color)
+        for (p = box_frame_mount_points())
+            translate([
+                p[0],
+                p[1],
+                frame_thickness - assembly_overlap
+            ])
+                difference() {
+
+                    cylinder(
+                        h = standoff_height,
+                        d = box_frame_standoff_diameter
+                    );
+
+                    translate([0, 0, -0.1])
+                        cylinder(
+                            h = standoff_height + 0.2,
+                            d = box_frame_standoff_hole_diameter
+                        );
+                }
+}
+
+
+module assembly() {
+
+    union() {
+
+        lower_mounting_frame(
+            include_box_mount_holes = true
+        );
+
+        box_frame_standoffs();
+
+        payload_box(include_mount_holes = true);
+
+        // Lid shown raised in preview.
+        color(lid_color)
+            lid_preview();
+    }
+}
+
+
 // ------------------------------------------------------
 // FINAL OUTPUT
 // ------------------------------------------------------
@@ -843,18 +960,15 @@ if (part == "lid") {
     color(lid_color)
         lid_for_printing();
 
-} else if (part == "body") {
+} else if (part == "box") {
 
-    main_body();
+    box_for_printing();
+
+} else if (part == "frame") {
+
+    frame_for_printing();
 
 } else {
 
-    union() {
-
-        main_body();
-
-        // Lid shown raised in preview
-        color(lid_color)
-            lid_preview();
-    }
+    assembly();
 }
