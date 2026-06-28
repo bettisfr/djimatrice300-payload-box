@@ -30,6 +30,12 @@ $fn = 96;
 // - "lid": lid only, flipped for FDM printing with the outer face on the bed
 part = "assembly"; // [assembly, box, frame, lid]
 
+// Preview labels are shown only in part="assembly".
+show_labels = false;
+label_size = 5;
+label_thickness = 0.4;
+label_color = "Black";
+
 // Matrice 300 mounting-hole spacing
 hole_spacing_x = 78;
 hole_spacing_y = 66;
@@ -106,9 +112,11 @@ lid_clearance = 0.4;
 lid_preview_gap = 25;
 
 lid_screw_diameter = 3.2;
-lid_screw_pad_size = 6.5;
+lid_screw_triangle_leg = 13;
 lid_screw_corner_offset = 4;
 lid_boss_top_clearance = 0.5;
+lid_nut_flat_width = 5.8;
+lid_nut_trap_depth = 2.6;
 
 // Box-to-frame standoff point diameter used for layout.
 standoff_point_diameter = arm_width;
@@ -641,9 +649,14 @@ function lid_screw_points() = [
 ];
 
 
+function hex_diameter_from_flat_width(flat_width) =
+    flat_width / cos(30);
+
+
 module lid_screw_pad_at(corner, x_dir, y_dir) {
 
     wall_base_z = upper_plane_z + upper_plane_thickness - assembly_overlap;
+    nut_rotation = (x_dir * y_dir > 0) ? 15 : -15;
     wall_body_height =
         box_wall_height -
         upper_plane_thickness -
@@ -659,16 +672,12 @@ module lid_screw_pad_at(corner, x_dir, y_dir) {
                     points = [
                         corner,
                         [
-                            corner[0] + (x_dir * lid_screw_pad_size),
+                            corner[0] + (x_dir * lid_screw_triangle_leg),
                             corner[1]
                         ],
                         [
-                            corner[0] + (x_dir * lid_screw_pad_size),
-                            corner[1] + (y_dir * lid_screw_pad_size)
-                        ],
-                        [
                             corner[0],
-                            corner[1] + (y_dir * lid_screw_pad_size)
+                            corner[1] + (y_dir * lid_screw_triangle_leg)
                         ]
                     ]
                 );
@@ -682,6 +691,18 @@ module lid_screw_pad_at(corner, x_dir, y_dir) {
                 h = wall_body_height + 0.2,
                 d = lid_screw_diameter
             );
+
+        translate([
+            corner[0] + (x_dir * lid_screw_corner_offset),
+            corner[1] + (y_dir * lid_screw_corner_offset),
+            wall_base_z + wall_body_height - lid_nut_trap_depth
+        ])
+            rotate([0, 0, nut_rotation])
+                cylinder(
+                    h = lid_nut_trap_depth + 0.1,
+                    d = hex_diameter_from_flat_width(lid_nut_flat_width),
+                    $fn = 6
+                );
     }
 }
 
@@ -932,6 +953,48 @@ module box_frame_standoffs() {
 }
 
 
+// ------------------------------------------------------
+// PREVIEW LABELS
+// ------------------------------------------------------
+
+module preview_label(label, p, z, size = label_size) {
+
+    color(label_color)
+        translate([p[0], p[1], z])
+            linear_extrude(height = label_thickness)
+                text(
+                    label,
+                    size = size,
+                    halign = "center",
+                    valign = "center"
+                );
+}
+
+
+module preview_labels() {
+
+    label_z = upper_plane_z + box_wall_height + 2;
+    mount_label_z = frame_thickness + 0.5;
+
+    // DJI mounting points.
+    preview_label("A", [A[0] + 10, A[1] + 6], mount_label_z);
+    preview_label("B", [B[0] - 10, B[1] + 6], mount_label_z);
+    preview_label("C", [C[0] - 10, C[1] - 6], mount_label_z);
+    preview_label("D", [D[0] + 10, D[1] - 6], mount_label_z);
+    preview_label("E", [E[0] - 8, E[1] - 8], mount_label_z);
+    preview_label("F", [F[0] + 8, F[1] - 8], mount_label_z);
+
+    // Main printable/assembly elements.
+    preview_label("BOX", [0, (A[1] + upper_rear_y) / 2], label_z, 7);
+    preview_label("FRAME", [0, -hole_spacing_y / 2], frame_thickness + 3, 6);
+    preview_label("LID", [0, (A[1] + upper_rear_y) / 2], upper_plane_z + box_wall_height + lid_preview_gap + lid_thickness + 2, 7);
+
+    // Standoff markers.
+    for (p = box_frame_mount_points())
+        preview_label("M3", [p[0], p[1]], upper_plane_z / 2, 3.5);
+}
+
+
 module assembly() {
 
     union() {
@@ -947,6 +1010,9 @@ module assembly() {
         // Lid shown raised in preview.
         color(lid_color)
             lid_preview();
+
+        if (show_labels)
+            preview_labels();
     }
 }
 
