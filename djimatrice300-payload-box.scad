@@ -116,7 +116,7 @@ lid_screw_triangle_leg = 13;
 lid_screw_corner_offset = 4;
 lid_boss_top_clearance = 0.5;
 lid_nut_flat_width = 5.8;
-lid_nut_trap_depth = 2.6;
+lid_nut_trap_depth = 2.8;
 
 // Box-to-frame standoff point diameter used for layout.
 standoff_point_diameter = arm_width;
