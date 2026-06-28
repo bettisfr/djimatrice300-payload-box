@@ -28,8 +28,8 @@ The design includes:
 
 - M300 hole spacing: `78 x 66 mm`
 - lower rear rail outer width: `71 mm`
-- box outer width: `88.5 mm`
-- box inner width: about `84.5 mm`
+- box outer width: `94.5 mm`
+- box inner width: about `90.5 mm`
 - box inner length: about `189.5 mm`
 - vertical clearance between lower frame and upper plate: `21 mm`
 - box wall thickness: `2 mm`
