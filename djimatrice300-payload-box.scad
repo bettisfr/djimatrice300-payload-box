@@ -44,7 +44,7 @@ hole_spacing_y = 66;
 tail_length = 115;
 
 // Lower frame
-frame_thickness = 2.5;
+frame_thickness = 5;
 arm_width = 5;
 boss_diameter = 12;
 
@@ -58,8 +58,9 @@ bolt_seat_depth = 3.5;
 bottom_hole_diameter = 3.2;
 
 // Rear cross braces
-brace_distance_1 = 40;
-brace_distance_2 = 90;
+brace_clear_from_ab_1 = 70;
+brace_clear_from_ab_2 = 110;
+brace_clear_from_ab_3 = 150;
 brace_width = arm_width;
 
 // Lower spacers
@@ -185,11 +186,26 @@ right_rail_front = [support_right_x - (arm_width / 2), A[1]];
 // REAR CROSS-BRACE POINTS
 // ------------------------------------------------------
 
-brace_1_left  = [E[0], E[1] + brace_distance_1];
-brace_1_right = [F[0], F[1] + brace_distance_1];
+function brace_center_y_from_ab_clear(clear_distance) =
+    A[1] - clear_distance - arm_width;
 
-brace_2_left  = [E[0], E[1] + brace_distance_2];
-brace_2_right = [F[0], F[1] + brace_distance_2];
+brace_1_y = brace_center_y_from_ab_clear(brace_clear_from_ab_1);
+brace_2_y = brace_center_y_from_ab_clear(brace_clear_from_ab_2);
+brace_3_y = brace_center_y_from_ab_clear(brace_clear_from_ab_3);
+
+brace_1_left  = [E[0], brace_1_y];
+brace_1_right = [F[0], brace_1_y];
+
+brace_2_left  = [E[0], brace_2_y];
+brace_2_right = [F[0], brace_2_y];
+
+brace_3_left  = [E[0], brace_3_y];
+brace_3_right = [F[0], brace_3_y];
+
+rear_diagonal_midpoint = [
+    (E[0] + F[0]) / 2,
+    brace_3_y
+];
 
 
 // ------------------------------------------------------
@@ -345,6 +361,29 @@ module lower_frame() {
                 brace_2_left,
                 brace_2_right,
                 brace_width,
+                frame_thickness
+            );
+
+            // Third cross brace
+            smooth_link(
+                brace_3_left,
+                brace_3_right,
+                brace_width,
+                frame_thickness
+            );
+
+            // Rear half-diagonal braces from E/F to the last cross-brace midpoint.
+            smooth_link(
+                E,
+                rear_diagonal_midpoint,
+                arm_width,
+                frame_thickness
+            );
+
+            smooth_link(
+                F,
+                rear_diagonal_midpoint,
+                arm_width,
                 frame_thickness
             );
         }

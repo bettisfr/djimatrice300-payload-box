@@ -14,6 +14,7 @@ The design includes:
 
 - Matrice 300 mounting hole pattern: `78 x 66 mm`
 - lower mounting frame with two rear rails
+- two rear half-diagonal braces for tail reinforcement
 - raised payload box with cable pass-throughs
 - separate screw-mounted lid with internal lip
 - internal triangular screw pads with M3 nut traps
@@ -28,10 +29,13 @@ The design includes:
 
 - M300 hole spacing: `78 x 66 mm`
 - lower rear rail outer width: `71 mm`
+- rear cross-brace clear distances from AB: `70 mm`, `110 mm`, `150 mm`
+- rear half-diagonal braces: from `E` and `F` to the midpoint of the last rear cross brace
 - box outer width: `94.5 mm`
 - box inner width: about `90.5 mm`
 - box inner length: about `189.5 mm`
-- vertical clearance between lower frame and upper plate: `21 mm`
+- lower frame thickness: `5 mm`
+- vertical clearance between lower frame and upper plate: `18.5 mm`
 - box wall thickness: `2 mm`
 - lid thickness: `1.5 mm`
 - M3 clearance holes: `3.2 mm`
